@@ -1,123 +1,225 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exercício do Alien</title>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
-    <style> body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; } </style>
-</head>
+    <head>
+        <!-- informa qual é o formato de codificação -->
+        <meta charset="UTF-8">
 
-<body>
-    <script>
-        // o que acontece aqui?
-        const larguraJogo = 700;
-        const alturaJogo = 850;
+        <!-- faz com que o tamanho da tela se adapte a cada monitor -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        // o que essa parte faz?
-        const config = {
-            type: Phaser.AUTO,
-            width: larguraJogo,
-            height: alturaJogo,
+        <!-- Define o nome da página -->
+        <title>Exercício do Alien</title>
 
-            physics: {
-                default: 'arcade',
-                arcade: {
-                    gravity: { y: 300 },
-                    debug: true
+        <!-- informa onde está o código framework utilizado -->
+        <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+
+        <!-- estiliza a página -->
+        <style> 
+            body { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; } 
+        </style>
+
+    </head>
+
+    <body>
+        <script>
+            // declara uma variavel para definir a altura e a largura do jogo
+            const larguraJogo = 700;
+            const alturaJogo = 850;
+
+            // o consig define as configurações do jogo
+            const config = {
+                // define seu tipo
+                type: Phaser.AUTO,
+
+                // define suas medidas
+                width: larguraJogo,
+                height: alturaJogo,
+
+                // define sua física
+                physics: {
+                    default: 'arcade',
+                    arcade: {
+                        gravity: { y: 300 },
+                        debug: false
+                    }
+                },
+
+                //informa onde se encontra o preload, create e update do jogo
+                scene: {
+                    preload: preload,
+                    create: create,
+                    update: update
                 }
-            },
+            };
 
-            scene: {
-                preload: preload,
-                create: create,
-                update: update
-            }
-        };
+            // cria um novo jogo phaser
+            const game = new Phaser.Game(config);
 
-        // o que acontece aqui?
-        const game = new Phaser.Game(config);
+            //define as variáveis que serão utilizadas posteriormente
+            var alien;
+            var teclado;
+            var fogo;
+            var plataforma1;
+            var plataforma2;
+            var astros;
+            var pontuacao = 0;
+            var placar;
+            var tipoDeAstros;
+            var lista;
 
-        var alien;
-        var teclado;
-        var fogo;
-        var plataforma;
-        var moeda;
-        var pontuacao = 0;
-        var placar;
-
-        function preload() {
-            this.load.image('background', 'assets/bg.png');
-            this.load.image('player', 'assets/alienigena.png');
-            this.load.image('turbo_nave', 'assets/turbo.png');
-            this.load.image('plataforma_tijolo', 'assets/tijolos.png');
-            this.load.image('moeda', 'assets/moeda.png');
-            this.load.image('planeta', 'assets/planeta.png')
-        }
-
-        function create() {
-            // o que acontece aqui?
-            this.add.image(larguraJogo/2, alturaJogo/2, 'background');
-            fogo = this.add.sprite(0, 0, 'turbo_nave');
-            fogo.setVisible(false);
-            alien = this.physics.add.sprite(larguraJogo/2, 0, 'player');
-            alien.setCollideWorldBounds(true);
-            teclado = this.input.keyboard.createCursorKeys();
-            plataforma = this.physics.add.staticImage(larguraJogo/2, alturaJogo/2, 'plataforma_tijolo');
-            this.physics.add.collider(alien, plataforma);
-            lista = ['moeda', 'planeta'];
-            var tipoDeMoeda = Phaser.Math.RND.between(0, 1);
-
-            moeda = this.physics.add.sprite(larguraJogo/2, 0, lista[tipoDeMoeda]);
-            moeda.setCollideWorldBounds(true);
-            moeda.setBounce(0.7); //??
-            this.physics.add.collider(moeda, plataforma);
-
-            placar = this.add.text(50, 50, 'Moedas:' + pontuacao, {fontSize: '45px', fill: '#495613'});
-            
-            this.physics.add.overlap(alien, moeda, function(){
-                moeda.setVisible(false); // moeda fica invisivel
-                tipoDeMoeda = Phaser.Math.RND.between(0, 1);
-                var posicaoMoeda_Y = Phaser.Math.RND.between(50, 650); // sorteia número
-                moeda.setPosition(posicaoMoeda_Y, 100); // ajusta a posição da moeda
-                pontuacao +=1; // soma pontuação
-                placar.setText('Moedas: ' + pontuacao); // atualiza texto do placar
-                moeda.setVisible(true); // ativa a visão da "nova moeda"
-            });
-        }
-
-        function update() {
-            if (teclado.left.isDown) {
-                alien.setVelocityX(-150);
-            } else if (teclado.right.isDown) {
-                alien.setVelocityX(150);
-            } else {
-                alien.setVelocityX(0);
+             // a função preload() carrega todos os ativos de mídia antes de o jogo ser criado.
+            function preload() {
+                this.load.image('background', 'assets/fundo.png'); 
+                this.load.image('player', 'assets/alienigena.png'); 
+                this.load.image('turbo_nave', 'assets/turbo.png'); 
+                this.load.image('plataforma_estrelas', 'assets/estrelas.png');
+                this.load.image('planeta', 'assets/planeta.png');
+                this.load.image('lua', 'assets/lua.png');
+                this.load.image('sol', 'assets/sol.png');
+                this.load.image('marte', 'assets/marte.png');
             }
 
-            if (teclado.up.isDown) {
-                alien.setVelocityY(-150);
-                ativarTurbo();
-            } else {
-                semTurbo();
+            // a função create() cria os ativos na tela e a lógica inicial do jogo
+            function create() {
+
+                // adiciona a imagem de fundo e utiliza as medidas da tela do jogo, divididas por dois, para posicionar a imagem no centro
+                this.add.image(larguraJogo/2, alturaJogo/2, 'background');
+
+                // cria a sprite do fogo na tela
+                fogo = this.add.sprite(0, 0, 'turbo_nave');
+
+                // torna a sprite do jogo invisível
+                fogo.setVisible(false);
+
+                // adiciona o alien a tela do jogo e o define como objeto com propriedades físicas
+                alien = this.physics.add.sprite(larguraJogo/2, 0, 'player');
+
+                // faz com que o personagem/alien colida com as bordas do jogo
+                alien.setCollideWorldBounds(true);
+
+                // cria as teclas do teclado, agora pode ser utilizado as teclas no jogo
+                teclado = this.input.keyboard.createCursorKeys();
+
+                // cria as plataformas no jogo
+                plataforma1 = this.physics.add.staticImage(600, 520, 'plataforma_estrelas');
+                plataforma2 = this.physics.add.staticImage(100, 270, 'plataforma_estrelas');
+
+                // adiciona a colisão do alien com as plataformas
+                this.physics.add.collider(alien, plataforma1);
+                this.physics.add.collider(alien, plataforma2);
+
+                // cria a lista que guarda os nomes das sprites dos astros
+                lista = ['sol', 'planeta', 'marte', 'lua'];
+
+                // gera um número aleatório de 0 a 3 que posteriormente sera usado para definir qual astro será usado
+                tipoDeAstros = Phaser.Math.RND.between(0, 3);
+
+                // gera a imagem do astro na tela, escolhendo qual vai ser de modo aleatório
+                astro = this.physics.add.sprite(larguraJogo/2, 0, lista[tipoDeAstros]).setScale(1.7);
+
+                // faz com que o astro colida com as bordas do jogo
+                astro.setCollideWorldBounds(true);
+
+                // adiciona uma propriedade física de "quicar" ao astro
+                astro.setBounce(0.7); 
+
+                // adiciona a colisão do astro com as plataformas
+                this.physics.add.collider(astro, plataforma1);
+                this.physics.add.collider(astro, plataforma2);
+
+                // adiciona a quantidade de astros capturados na tela do jogo
+                placar = this.add.text(50, 50, 'astros:' + pontuacao, {fontSize: '45px', fill: '#ffffff'});
+                
+                //faz com que ative uma função toda vez que o alien encostar no astro
+                this.physics.add.overlap(alien, astro, function(){
+
+                    // o astro fica invisivel
+                    astro.setVisible(false);
+                    
+                    // escolhe de maneira aleatória o próximo astro que aparecerá
+                    tipoDeAstros = Phaser.Math.RND.between(0, 3); 
+
+                    // escolhe de maneira aleatória a posição y em que o astro vai aparecer
+                    var posicaoastro_Y = Phaser.Math.RND.between(50, 650); 
+
+                    // ajusta a posição do astro
+                    astro.setPosition(posicaoastro_Y, 100);
+
+                    // soma 1 na pontuação
+                    pontuacao +=1; 
+
+                    // atualiza o texto do placar
+                    placar.setText('Astros: ' + pontuacao); 
+
+                    // atualiza o tipo de astro
+                    astro.setTexture(lista[tipoDeAstros]);
+
+                    // ativa a visão do "novo astro"
+                    astro.setVisible(true); 
+                });
             }
 
-            fogo.setPosition(alien.x, alien.y + alien.height/2);
-        }
+             // a função update() atualiza a lógica do jogo
+            function update() {
 
-        function ativarTurbo() {
-            fogo.setVisible(true);
-        }
+                // é uma condição para verificar se a seta para a esquerda está pressionada
+                if (teclado.left.isDown) {
 
-        function semTurbo() {
-            fogo.setVisible(false);
-        }
+                    // faz com que o alien mova para a esquerda
+                    alien.setVelocityX(-200);
+                } 
+                // é uma condição para verificar se a seta para a direita está pressionada
+                else if (teclado.right.isDown) {
 
-    </script>
-</body>
+                    // faz com que o alien mova para a esquerda
+                    alien.setVelocityX(200);
+                } 
+                // define o que acontece caso nenhuma das teclas laterais estejam sendo pressionadas
+                else {
+
+                    // faz com que o alien fique parado na horizontal
+                    alien.setVelocityX(0);
+                }
+
+                // é uma condição para verificar se a seta para cima está pressionada
+                if (teclado.up.isDown) {
+
+                    // faz com que o alien mova para cima
+                    alien.setVelocityY(-200);
+
+                    // chama a função ativarTurbo
+                    ativarTurbo();
+                } 
+                // define o que acontece caso a peça para cima não esteja pressionada
+                else {
+
+                    //chama a função semTurbo
+                    semTurbo();
+                }
+
+                //define a posição do fogo de acordo com a posição do alien
+                fogo.setPosition(alien.x, alien.y + alien.height/2);
+            }
+
+            // cria a função ativarTurbo
+            function ativarTurbo() {
+
+                // torna o fogo visível
+                fogo.setVisible(true);
+            }
+
+            // cria a função semTurbo
+            function semTurbo() {
+
+                // torna o fogo invisível
+                fogo.setVisible(false);
+            }
+
+        </script>
+    </body>
 </html>
-
-<!-- comentar o código -->
-<!-- incluir mais um obstaculo com colisão -->
-<!-- publicar no GitHub e enviar a resposta no card da Adalove -->
-<!-- utilizar estrutura do tipo lista no código -->
